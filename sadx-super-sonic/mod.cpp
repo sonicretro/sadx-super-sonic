@@ -12,10 +12,9 @@ void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 {
 	char index = *(char*)_this->UnknownB_ptr;
 	CharObj2* data2 = CharObj2Ptrs[index];
+
 	if (data2 != nullptr)
-	{
 		data2->PhysicsData = PhysicsArray[Characters_Sonic];
-	}
 }
 
 extern "C"
@@ -41,15 +40,23 @@ extern "C"
 
 			if (ControllerPointers[i]->PressedButtons & Buttons_Z)
 			{
-				if (!(data2->Upgrades & Upgrades_SuperSonic))
+				// I'm confused by this. Every time I check this, that bit isn't there,
+				// but the super physics object checks for that bit and it IS there,
+				// otherwise it would restore the original physics.
+				// Consequently, I'm setting the bit myself.
+				if ((data2->Upgrades & Upgrades_SuperSonic) != Upgrades_SuperSonic)
 				{
-					data1->Status |= Status_DoNextAction;
+					// Transform into Super Sonic
 					data1->NextAction = 46;
+					data1->Status |= Status_DoNextAction;
+					data2->Upgrades |= Upgrades_SuperSonic;
 				}
 				else
 				{
-					data1->Status |= Status_DoNextAction;
+					// Change back to normal Sonic
 					data1->NextAction = 47;
+					data1->Status |= Status_DoNextAction;
+					data2->Upgrades &= ~Upgrades_SuperSonic;
 				}
 			}
 		}
