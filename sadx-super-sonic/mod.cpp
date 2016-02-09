@@ -9,6 +9,8 @@ DataPointer(int, CurrentSong, 0x00912698);
 DataPointer(int, LastSong, 0x0091269C);
 DataPointer(Bool, Music_Enabled, 0x0091268C);
 
+FunctionPointer(void, ForcePlayerAction, (Uint8 playerNum, Uint8 action), 0x00441260);
+
 static int ring_timer = 0;
 static int super_count = 0;	// Dirty hack for multitap mod compatibility
 
@@ -69,7 +71,7 @@ extern "C"
 			return;
 
 		// TODO: Jump + Cancel to transform, 50 ring requirement
-		for (Uint32 i = 0; i < 8; i++)
+		for (Uint8 i = 0; i < 8; i++)
 		{
 			CharObj1* data1 = CharObj1Ptrs[i];
 			CharObj2* data2 = CharObj2Ptrs[i];
@@ -87,8 +89,7 @@ extern "C"
 				if (toggle)
 				{
 					// Transform into Super Sonic
-					data1->NextAction = 46;
-					data1->Status |= Status_DoNextAction;
+					ForcePlayerAction(i, 46);
 					data2->Upgrades |= Upgrades_SuperSonic;
 					PlayVoice(396);
 
@@ -99,8 +100,7 @@ extern "C"
 			else if (toggle || !Rings)
 			{
 				// Change back to normal Sonic
-				data1->NextAction = 47;
-				data1->Status |= Status_DoNextAction;
+				ForcePlayerAction(i, 47);
 				data2->Upgrades &= ~Upgrades_SuperSonic;
 				--super_count;
 			}
