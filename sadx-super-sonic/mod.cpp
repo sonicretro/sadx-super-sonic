@@ -35,10 +35,14 @@ void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 	if (Music_Enabled && CurrentSong != 86)
 		CurrentSong = 86;
 
-	++ring_timer %= 60;
+	if (IsControllerEnabled(0)) 
+		++ring_timer %= 60;
 
 	if (!ring_timer)
+	{
 		AddRings(-1);
+		ring_timer = 0;
+	}
 }
 void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 {
@@ -79,14 +83,14 @@ extern "C"
 			if (data1 == nullptr || data1->CharID != Characters_Sonic)
 				continue;
 
-			bool toggle = (ControllerPointers[i]->PressedButtons & Buttons_Z) != 0;
+			bool toggle = (((ControllerPointers[i]->PressedButtons & Buttons_B) != 0) && ((ControllerPointers[i]->HeldButtons & Buttons_A) != 0) && (data1->Status & 1) == 0);
 			// I'm confused by this. Every time I check this, that bit isn't there,
 			// but the super physics object checks for that bit and it IS there,
 			// otherwise it would restore the original physics.
 			// Consequently, I'm setting the bit myself.
 			if ((data2->Upgrades & Upgrades_SuperSonic) != Upgrades_SuperSonic)
 			{
-				if (toggle)
+				if (toggle && Rings >= 50)
 				{
 					// Transform into Super Sonic
 					ForcePlayerAction(i, 46);
