@@ -35,7 +35,8 @@ void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 	if (Music_Enabled && CurrentSong != 86)
 		CurrentSong = 86;
 
-	++ring_timer %= 60;
+	if (IsControllerEnabled(0)) 
+		++ring_timer %= 60;
 
 	if (!ring_timer)
 		AddRings(-1);
