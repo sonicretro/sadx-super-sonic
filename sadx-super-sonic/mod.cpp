@@ -90,7 +90,7 @@ extern "C"
 			// Consequently, I'm setting the bit myself.
 			if ((data2->Upgrades & Upgrades_SuperSonic) != Upgrades_SuperSonic)
 			{
-				if (toggle)
+				if (toggle && Rings >= 50)
 				{
 					// Transform into Super Sonic
 					ForcePlayerAction(i, 46);
