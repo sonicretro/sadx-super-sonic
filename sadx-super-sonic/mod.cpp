@@ -83,7 +83,7 @@ extern "C"
 				continue;
 
 			bool isSuper = (data2->Upgrades & Upgrades_SuperSonic) != 0;
-			bool toggle = Controllers[i].PressedButtons & Buttons_B;
+			bool toggle = (Controllers[i].PressedButtons & Buttons_B) != 0;
 
 			if (!isSuper)
 			{
