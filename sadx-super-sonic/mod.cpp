@@ -83,7 +83,7 @@ extern "C"
 			if (data1 == nullptr || data1->CharID != Characters_Sonic)
 				continue;
 
-			bool toggle = (ControllerPointers[i]->PressedButtons & Buttons_Z) != 0;
+			bool toggle = (((ControllerPointers[i]->PressedButtons & Buttons_B) != 0) && ((ControllerPointers[i]->HeldButtons & Buttons_A) != 0) && (data1->Status & 1) == 0);
 			// I'm confused by this. Every time I check this, that bit isn't there,
 			// but the super physics object checks for that bit and it IS there,
 			// otherwise it would restore the original physics.
