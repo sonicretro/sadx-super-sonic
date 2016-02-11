@@ -13,6 +13,7 @@ FunctionPointer(void, ForcePlayerAction, (Uint8 playerNum, Uint8 action), 0x0044
 
 static int ring_timer = 0;
 static int super_count = 0;	// Dirty hack for multitap mod compatibility
+static Uint8 last_action[8] = {};
 
 void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 {
@@ -35,7 +36,7 @@ void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 	if (Music_Enabled && CurrentSong != 86)
 		CurrentSong = 86;
 
-	if (IsControllerEnabled(0)) 
+	if (IsControllerEnabled(0))
 		++ring_timer %= 60;
 
 	if (!ring_timer)
@@ -74,7 +75,6 @@ extern "C"
 		if (GameState != 15)
 			return;
 
-		// TODO: Jump + Cancel to transform, 50 ring requirement
 		for (Uint8 i = 0; i < 8; i++)
 		{
 			CharObj1* data1 = CharObj1Ptrs[i];
@@ -83,14 +83,12 @@ extern "C"
 			if (data1 == nullptr || data1->CharID != Characters_Sonic)
 				continue;
 
-			bool toggle = (((ControllerPointers[i]->PressedButtons & Buttons_B) != 0) && ((ControllerPointers[i]->HeldButtons & Buttons_A) != 0) && (data1->Status & 1) == 0);
-			// I'm confused by this. Every time I check this, that bit isn't there,
-			// but the super physics object checks for that bit and it IS there,
-			// otherwise it would restore the original physics.
-			// Consequently, I'm setting the bit myself.
-			if ((data2->Upgrades & Upgrades_SuperSonic) != Upgrades_SuperSonic)
+			bool isSuper = (data2->Upgrades & Upgrades_SuperSonic) != 0;
+			bool toggle = Controllers[i].PressedButtons & Buttons_B;
+
+			if (!isSuper)
 			{
-				if (toggle && Rings >= 50)
+				if (toggle && last_action[i] == 8 && data1->Action == 12 && Rings >= 50)
 				{
 					// Transform into Super Sonic
 					ForcePlayerAction(i, 46);
@@ -101,13 +99,15 @@ extern "C"
 						SuperSonicManager_Load();
 				}
 			}
-			else if (toggle || !Rings)
+			else if (toggle && last_action[i] == 82 && data1->Action == 78 || !Rings)
 			{
 				// Change back to normal Sonic
 				ForcePlayerAction(i, 47);
 				data2->Upgrades &= ~Upgrades_SuperSonic;
 				--super_count;
 			}
+
+			last_action[i] = data1->Action;
 		}
 
 		SuperSonicFlag = super_count > 0;
