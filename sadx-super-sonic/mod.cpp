@@ -24,7 +24,6 @@ void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 		data2->PhysicsData = PhysicsArray[Characters_Sonic];
 }
 
-// TODO: Figure out why this runs on the result screen
 void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 {
 	if (super_count < 1)
@@ -33,14 +32,17 @@ void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 		return;
 	}
 
-	if (Music_Enabled && CurrentSong != 86)
-		CurrentSong = 86;
-
+	// HACK: Result screen disables P1 control. There's probably a nicer way to do this, we just need to find it.
 	if (IsControllerEnabled(0))
+	{
+		if (Music_Enabled && CurrentSong != 86)
+			CurrentSong = 86;
+
 		++ring_timer %= 60;
 
-	if (!ring_timer)
-		AddRings(-1);
+		if (!ring_timer)
+			AddRings(-1);
+	}
 }
 void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 {
