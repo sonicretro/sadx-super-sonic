@@ -40,10 +40,7 @@ void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 		++ring_timer %= 60;
 
 	if (!ring_timer)
-	{
 		AddRings(-1);
-		ring_timer = 0;
-	}
 }
 void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 {
