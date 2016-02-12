@@ -146,13 +146,20 @@ extern "C"
 						SuperSonicManager_Load();
 				}
 			}
-			else if (toggle && last_action[i] == 82 && data1->Action == 78 || !Rings)
+			else if (toggle && last_action[i] == 82 && data1->Action == 78 || !Rings
+				// Change to normal Sonic in pinabll tables
+				|| CurrentLevel == LevelIDs_Casinopolis && (CurrentAct == 2 || CurrentAct == 3))
 			{
 				// Change back to normal Sonic
 				ForcePlayerAction(i, 47);
 				data2->Upgrades &= ~Upgrades_SuperSonic;
 				--super_count;
 			}
+
+#ifdef _DEBUG
+			if (!isSuper && !Rings)
+				Rings = 50;
+#endif
 
 			last_action[i] = data1->Action;
 		}
