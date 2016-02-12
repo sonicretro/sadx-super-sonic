@@ -59,6 +59,48 @@ void SuperSonicManager_Load()
 		obj->DeleteSub = SuperSonicManager_Delete;
 }
 
+int __stdcall SuperWaterCheck_C(CharObj1* data1, CharObj2* data2)
+{
+	return (int)(data1->CharID == Characters_Sonic && (data2->Upgrades & Upgrades_SuperSonic) != 0);
+}
+
+void* jump_to;
+void __declspec(naked) SuperWaterCheck()
+{
+	__asm
+	{
+		jnz dothing
+
+		mov jump_to, 004497B6h
+		jmp jump_to
+
+	dothing:
+		// Save whatever's in EAX
+		push eax
+
+		push [esp+6a8h+4h+0ch]	// CharObj2
+		push ebx				// CharObj1
+		call SuperWaterCheck_C
+
+		test eax, eax
+
+		jnz is_true
+
+		// Restore EAX
+		pop eax
+
+		mov jump_to, 004497B6h
+		jmp jump_to
+
+	is_true:
+		// Restore EAX
+		pop eax
+
+		mov jump_to, 004496E7h
+		jmp jump_to
+	}
+}
+
 static const PVMEntry SuperSonicPVM = { "SUPERSONIC", &SUPERSONIC_TEXLIST };
 
 extern "C"
@@ -67,6 +109,7 @@ extern "C"
 	{
 		helper->RegisterCharacterPVM(Characters_Sonic, SuperSonicPVM);
 		WriteData((void**)0x004943C2, (void*)Sonic_SuperPhysics_Delete);
+		WriteJump((void*)0x004496E1, SuperWaterCheck);
 	}
 
 	void EXPORT OnFrame()
