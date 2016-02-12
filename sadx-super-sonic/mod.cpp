@@ -75,7 +75,7 @@ extern "C"
 			return;
 
 #ifndef _DEBUG
-		if (GetEventFlag(EventFlags_SuperSonicAdventureComplete))
+		if (!GetEventFlag(EventFlags_SuperSonicAdventureComplete))
 			return;
 #endif
 
