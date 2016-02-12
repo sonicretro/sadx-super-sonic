@@ -10,10 +10,18 @@ DataPointer(int, LastSong, 0x0091269C);
 DataPointer(Bool, Music_Enabled, 0x0091268C);
 
 FunctionPointer(void, ForcePlayerAction, (Uint8 playerNum, Uint8 action), 0x00441260);
+FunctionPointer(int, _rand, (void), 0x006443BF);
 
 static int ring_timer = 0;
 static int super_count = 0;	// Dirty hack for multitap mod compatibility
 static Uint8 last_action[8] = {};
+static int clips[] = {
+	402,
+	508,
+	874,
+	1427,
+	1461
+};
 
 void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 {
@@ -78,7 +86,7 @@ void __declspec(naked) SuperWaterCheck()
 		// Save whatever's in EAX
 		push eax
 
-		push [esp+6a8h+4h+0ch]	// CharObj2
+		push[esp + 6a8h + 4h + 0ch]	// CharObj2
 		push ebx				// CharObj1
 		call SuperWaterCheck_C
 
@@ -103,6 +111,21 @@ void __declspec(naked) SuperWaterCheck()
 
 static const PVMEntry SuperSonicPVM = { "SUPERSONIC", &SUPERSONIC_TEXLIST };
 
+static inline bool IsStageBlacklisted()
+{
+	switch (CurrentLevel)
+	{
+		default:
+			return false;
+
+		case LevelIDs_Casinopolis:
+			return (CurrentAct == 2 || CurrentAct == 3);
+
+		case LevelIDs_SpeedHighway:
+			return CurrentAct == 1;
+	}
+}
+
 extern "C"
 {
 	void EXPORT Init(const char* path, HelperFunctions* helper)
@@ -122,6 +145,8 @@ extern "C"
 			return;
 #endif
 
+		bool isBlacklisted = IsStageBlacklisted();
+
 		for (Uint8 i = 0; i < 8; i++)
 		{
 			CharObj1* data1 = CharObj1Ptrs[i];
@@ -132,34 +157,39 @@ extern "C"
 
 			bool isSuper = (data2->Upgrades & Upgrades_SuperSonic) != 0;
 			bool toggle = (Controllers[i].PressedButtons & Buttons_B) != 0;
+			bool action = !isSuper ? (last_action[i] == 8 && data1->Action == 12) : (last_action[i] == 82 && data1->Action == 78);
 
 			if (!isSuper)
 			{
-				if (toggle && last_action[i] == 8 && data1->Action == 12 && Rings >= 50)
+#ifdef _DEBUG
+				if (!Rings)
+					Rings = 50;
+#endif
+				if (toggle && action)
 				{
-					// Transform into Super Sonic
-					ForcePlayerAction(i, 46);
-					data2->Upgrades |= Upgrades_SuperSonic;
-					PlayVoice(396);
+					if (isBlacklisted)
+					{
+						PlayVoice(clips[_rand() % LengthOfArray(clips)]);
+					}
+					else if (Rings >= 50)
+					{
+						// Transform into Super Sonic
+						ForcePlayerAction(i, 46);
+						data2->Upgrades |= Upgrades_SuperSonic;
+						PlayVoice(396);
 
-					if (!super_count++)
-						SuperSonicManager_Load();
+						if (!super_count++)
+							SuperSonicManager_Load();
+					}
 				}
 			}
-			else if (toggle && last_action[i] == 82 && data1->Action == 78 || !Rings
-				// Change to normal Sonic in pinabll tables
-				|| CurrentLevel == LevelIDs_Casinopolis && (CurrentAct == 2 || CurrentAct == 3))
+			else if (isBlacklisted || action && toggle || !Rings)
 			{
 				// Change back to normal Sonic
 				ForcePlayerAction(i, 47);
 				data2->Upgrades &= ~Upgrades_SuperSonic;
 				--super_count;
 			}
-
-#ifdef _DEBUG
-			if (!isSuper && !Rings)
-				Rings = 50;
-#endif
 
 			last_action[i] = data1->Action;
 		}
