@@ -71,7 +71,7 @@ extern "C"
 
 	void EXPORT OnFrame()
 	{
-		if (GameState != 15)
+		if (GameState != 15 || GetEventFlag(EventFlags_SuperSonicAdventureComplete))
 			return;
 
 		for (Uint8 i = 0; i < 8; i++)
