@@ -14,7 +14,11 @@ FunctionPointer(int, _rand, (void), 0x006443BF);
 
 static int ring_timer = 0;
 static int super_count = 0;	// Dirty hack for multitap mod compatibility
+static short last_level = 0;
+static short last_act = 0;
+static int LevelSong = 0;
 static Uint8 last_action[8] = {};
+
 static int clips[] = {
 	402,
 	508,
@@ -22,6 +26,25 @@ static int clips[] = {
 	1427,
 	1461
 };
+
+void SetMusic()
+{
+	if (!Music_Enabled)
+		return;
+
+	last_level = CurrentLevel;
+	last_act = CurrentAct;
+
+	LevelSong = CurrentSong;
+	LastSong = CurrentSong = 86;
+}
+void RestoreMusic()
+{
+	if (!Music_Enabled)
+		return;
+
+	LastSong = CurrentSong = LevelSong;
+}
 
 void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 {
@@ -40,12 +63,12 @@ void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 		return;
 	}
 
+	if (CurrentSong != -1 && (CurrentLevel != last_level || CurrentAct != last_act))
+		SetMusic();
+
 	// HACK: Result screen disables P1 control. There's probably a nicer way to do this, we just need to find it.
 	if (IsControllerEnabled(0))
 	{
-		if (Music_Enabled && CurrentSong != 86)
-			CurrentSong = 86;
-
 		++ring_timer %= 60;
 
 		if (!ring_timer)
@@ -56,15 +79,15 @@ void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 {
 	super_count = 0;
 	ring_timer = 0;
-
-	if (Music_Enabled)
-		CurrentSong = LastSong;
+	RestoreMusic();
 }
 void SuperSonicManager_Load()
 {
 	ObjectMaster* obj = LoadObject(0, 2, SuperSonicManager_Main);
 	if (obj)
 		obj->DeleteSub = SuperSonicManager_Delete;
+
+	SetMusic();
 }
 
 int __stdcall SuperWaterCheck_C(CharObj1* data1, CharObj2* data2)
@@ -133,6 +156,12 @@ extern "C"
 		helper->RegisterCharacterPVM(Characters_Sonic, SuperSonicPVM);
 		WriteData((void**)0x004943C2, (void*)Sonic_SuperPhysics_Delete);
 		WriteJump((void*)0x004496E1, SuperWaterCheck);
+
+		LandTable* ec2mesh = (LandTable*)0x01039E9C;
+		NJS_OBJECT* obj = ec2mesh->COLList[1].OBJECT;
+		obj->ang[0] = 32768;
+		obj->pos[1] = -3.0f;
+		obj->pos[2] = -5850.0f;
 	}
 
 	void EXPORT OnFrame()
