@@ -166,7 +166,7 @@ extern "C"
 
 	void EXPORT OnFrame()
 	{
-		if (GameState != 15)
+		if (GameState != 15 || MetalSonicFlag)
 			return;
 
 #ifndef _DEBUG
