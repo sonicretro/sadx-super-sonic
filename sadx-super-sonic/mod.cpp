@@ -212,12 +212,22 @@ extern "C"
 					}
 				}
 			}
-			else if (isBlacklisted || action && toggle || !Rings)
+			else
 			{
-				// Change back to normal Sonic
-				ForcePlayerAction(i, 47);
-				data2->Upgrades &= ~Upgrades_SuperSonic;
-				--super_count;
+				// TODO: Consider storing the queued action in the case of NextAction 13, then re-applying
+				// the stored queued action next frame to fix the spindashy things.
+				bool detransform = data1->Status & Status_DoNextAction && (data1->NextAction == 12 || data1->NextAction == 13);
+
+				if (isBlacklisted || detransform || action && toggle || !Rings)
+				{
+					if (detransform)
+						PlayVoice(clips[_rand() % LengthOfArray(clips)]);
+
+					// Change back to normal Sonic
+					ForcePlayerAction(i, 47);
+					data2->Upgrades &= ~Upgrades_SuperSonic;
+					--super_count;
+				}
 			}
 
 			last_action[i] = data1->Action;
