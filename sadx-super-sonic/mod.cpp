@@ -203,6 +203,7 @@ extern "C"
 					else if (Rings >= 50)
 					{
 						// Transform into Super Sonic
+						data1->Status &= ~Status_LightDash;
 						ForcePlayerAction(i, 46);
 						data2->Upgrades |= Upgrades_SuperSonic;
 						PlayVoice(396);
