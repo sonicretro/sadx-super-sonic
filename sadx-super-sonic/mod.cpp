@@ -216,7 +216,8 @@ extern "C"
 			{
 				// TODO: Consider storing the queued action in the case of NextAction 13, then re-applying
 				// the stored queued action next frame to fix the spindashy things.
-				bool detransform = data1->Status & Status_DoNextAction && (data1->NextAction == 12 || data1->NextAction == 13);
+				bool detransform = data1->Status & Status_DoNextAction &&
+					(data1->NextAction == 12 || data1->NextAction == 13 && CurrentLevel == LevelIDs_TwinklePark);
 
 				if (isBlacklisted || detransform || action && toggle || !Rings)
 				{
