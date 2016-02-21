@@ -100,12 +100,13 @@ void __declspec(naked) SuperWaterCheck()
 {
 	__asm
 	{
-		jnz dothing
+		jnz not_gamma
 
-		mov jump_to, 004497B6h
+		// If Gamma, treat surface as solid
+		mov jump_to, 004496E7h
 		jmp jump_to
 
-	dothing:
+	not_gamma:
 		// Save whatever's in EAX
 		push eax
 
