@@ -156,6 +156,11 @@ extern "C"
 		WriteData((void**)0x004943C2, (void*)Sonic_SuperPhysics_Delete);
 		WriteJump((void*)0x004496E1, SuperWaterCheck);
 
+		// Fixes vertical offset when completing a stage
+		Uint8 nop[7] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+		WriteData((void*)0x00494E13, &nop, 7);
+
+		// Fixes upside down water plane in Emerald Coast 2
 		LandTable* ec2mesh = (LandTable*)0x01039E9C;
 		NJS_OBJECT* obj = ec2mesh->COLList[1].OBJECT;
 		obj->ang[0] = 32768;
