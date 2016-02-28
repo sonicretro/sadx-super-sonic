@@ -27,7 +27,7 @@ static int clips[] = {
 	1461
 };
 
-void SetMusic()
+static void SetMusic()
 {
 	if (!Music_Enabled)
 		return;
@@ -36,9 +36,9 @@ void SetMusic()
 	last_act = CurrentAct;
 
 	LevelSong = CurrentSong;
-	LastSong = CurrentSong = 86;
+	LastSong = CurrentSong = MusicIDs_ThemeOfSuperSonic;
 }
-void RestoreMusic()
+static void RestoreMusic()
 {
 	if (!Music_Enabled)
 		return;
@@ -46,7 +46,7 @@ void RestoreMusic()
 	LastSong = CurrentSong = LevelSong;
 }
 
-void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
+static void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 {
 	char index = *(char*)_this->UnknownB_ptr;
 	CharObj2* data2 = CharObj2Ptrs[index];
@@ -55,7 +55,7 @@ void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 		data2->PhysicsData = PhysicsArray[Characters_Sonic];
 }
 
-void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
+static void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 {
 	if (super_count < 1)
 	{
@@ -75,13 +75,13 @@ void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 			AddRings(-1);
 	}
 }
-void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
+static void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 {
 	super_count = 0;
 	ring_timer = 0;
 	RestoreMusic();
 }
-void SuperSonicManager_Load()
+static void SuperSonicManager_Load()
 {
 	ObjectMaster* obj = LoadObject(0, 2, SuperSonicManager_Main);
 	if (obj)
@@ -90,13 +90,13 @@ void SuperSonicManager_Load()
 	SetMusic();
 }
 
-int __stdcall SuperWaterCheck_C(CharObj1* data1, CharObj2* data2)
+static int __stdcall SuperWaterCheck_C(CharObj1* data1, CharObj2* data2)
 {
 	return (int)(data1->CharID == Characters_Sonic && (data2->Upgrades & Upgrades_SuperSonic) != 0);
 }
 
-void* jump_to;
-void __declspec(naked) SuperWaterCheck()
+static void* jump_to;
+static void __declspec(naked) SuperWaterCheck()
 {
 	__asm
 	{
@@ -110,8 +110,8 @@ void __declspec(naked) SuperWaterCheck()
 		// Save whatever's in EAX
 		push eax
 
-		push[esp + 6a8h + 4h + 0ch]	// CharObj2
-		push ebx				// CharObj1
+		push [esp + 6A8h + 4h + 0Ch]	// CharObj2
+		push ebx						// CharObj1
 		call SuperWaterCheck_C
 
 		test eax, eax
@@ -152,6 +152,8 @@ static inline bool IsStageBlacklisted()
 
 extern "C"
 {
+	EXPORT ModInfo SADXModInfo = { ModLoaderVer };
+
 	void EXPORT Init(const char* path, HelperFunctions* helper)
 	{
 		helper->RegisterCharacterPVM(Characters_Sonic, SuperSonicPVM);
@@ -238,6 +240,4 @@ extern "C"
 
 		SuperSonicFlag = super_count > 0;
 	}
-
-	EXPORT ModInfo SADXModInfo = { ModLoaderVer };
 }
