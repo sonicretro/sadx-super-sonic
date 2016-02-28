@@ -29,7 +29,7 @@ static int clips[] = {
 
 static void SetMusic()
 {
-	if (!Music_Enabled)
+	if (!Music_Enabled || CurrentSong == MusicIDs_ThemeOfSuperSonic)
 		return;
 
 	last_level = CurrentLevel;
