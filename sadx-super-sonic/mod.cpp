@@ -35,7 +35,7 @@ static void SetMusic()
 	last_level = CurrentLevel;
 	last_act = CurrentAct;
 
-	LevelSong = CurrentSong;
+	LevelSong = LastSong;
 	LastSong = CurrentSong = MusicIDs_ThemeOfSuperSonic;
 }
 static void RestoreMusic()
@@ -95,16 +95,15 @@ static int __stdcall SuperWaterCheck_C(CharObj1* data1, CharObj2* data2)
 	return (int)(data1->CharID == Characters_Sonic && (data2->Upgrades & Upgrades_SuperSonic) != 0);
 }
 
-static void* jump_to;
+static const void* surface_solid = (void*)0x004496E7;
+static const void* surface_water = (void*)0x004497B6;
 static void __declspec(naked) SuperWaterCheck()
 {
 	__asm
 	{
-		jnz not_gamma
-
 		// If Gamma, treat surface as solid
-		mov jump_to, 004496E7h
-		jmp jump_to
+		jnz not_gamma
+		jmp surface_solid
 
 	not_gamma:
 		// Save whatever's in EAX
@@ -121,15 +120,12 @@ static void __declspec(naked) SuperWaterCheck()
 		// Restore EAX
 		pop eax
 
-		mov jump_to, 004497B6h
-		jmp jump_to
+		jmp surface_water
 
 	is_true:
 		// Restore EAX
 		pop eax
-
-		mov jump_to, 004496E7h
-		jmp jump_to
+		jmp surface_solid
 	}
 }
 
