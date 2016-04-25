@@ -9,7 +9,6 @@ DataPointer(int, CurrentSong, 0x00912698);
 DataPointer(int, LastSong, 0x0091269C);
 DataPointer(Bool, Music_Enabled, 0x0091268C);
 
-FunctionPointer(void, ForcePlayerAction, (Uint8 playerNum, Uint8 action), 0x00441260);
 FunctionPointer(int, _rand, (void), 0x006443BF);
 
 static int ring_timer = 0;
@@ -46,7 +45,7 @@ static void RestoreMusic()
 	LastSong = CurrentSong = LevelSong;
 }
 
-static void __cdecl Sonic_SuperPhysics_Delete(ObjectMaster* _this)
+static void __cdecl _Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 {
 	char index = *(char*)_this->UnknownB_ptr;
 	CharObj2* data2 = CharObj2Ptrs[index];
@@ -83,14 +82,14 @@ static void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 }
 static void SuperSonicManager_Load()
 {
-	ObjectMaster* obj = LoadObject(0, 2, SuperSonicManager_Main);
+	ObjectMaster* obj = LoadObject((LoadObj)0, 2, SuperSonicManager_Main);
 	if (obj)
 		obj->DeleteSub = SuperSonicManager_Delete;
 
 	SetMusic();
 }
 
-static int __stdcall SuperWaterCheck_C(CharObj1* data1, CharObj2* data2)
+static int __stdcall SuperWaterCheck_C(EntityData1* data1, CharObj2* data2)
 {
 	return (int)(data1->CharID == Characters_Sonic && (data2->Upgrades & Upgrades_SuperSonic) != 0);
 }
@@ -110,7 +109,7 @@ static void __declspec(naked) SuperWaterCheck()
 		push eax
 
 		push [esp + 6A8h + 4h + 0Ch]	// CharObj2
-		push ebx						// CharObj1
+		push ebx						// EntityData1
 		call SuperWaterCheck_C
 
 		test eax, eax
@@ -153,7 +152,7 @@ extern "C"
 	void EXPORT Init(const char* path, HelperFunctions* helper)
 	{
 		helper->RegisterCharacterPVM(Characters_Sonic, SuperSonicPVM);
-		WriteData((void**)0x004943C2, (void*)Sonic_SuperPhysics_Delete);
+		WriteData((void**)0x004943C2, (void*)_Sonic_SuperPhysics_Delete);
 		WriteJump((void*)0x004496E1, SuperWaterCheck);
 
 		// Fixes vertical offset when completing a stage
@@ -182,7 +181,7 @@ extern "C"
 
 		for (Uint8 i = 0; i < 8; i++)
 		{
-			CharObj1* data1 = CharObj1Ptrs[i];
+			EntityData1* data1 = CharObj1Ptrs[i];
 			CharObj2* data2 = CharObj2Ptrs[i];
 
 			if (data1 == nullptr || data1->CharID != Characters_Sonic)
