@@ -29,7 +29,9 @@ static int clips[] = {
 static void SetMusic()
 {
 	if (!Music_Enabled || CurrentSong == MusicIDs_ThemeOfSuperSonic)
+	{
 		return;
+	}
 
 	last_level = CurrentLevel;
 	last_act = CurrentAct;
@@ -40,7 +42,9 @@ static void SetMusic()
 static void RestoreMusic()
 {
 	if (!Music_Enabled)
+	{
 		return;
+	}
 
 	LastSong = CurrentSong = LevelSong;
 }
@@ -51,7 +55,9 @@ static void __cdecl _Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 	CharObj2* data2 = CharObj2Ptrs[index];
 
 	if (data2 != nullptr)
+	{
 		data2->PhysicsData = PhysicsArray[Characters_Sonic];
+	}
 }
 
 static void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
@@ -63,7 +69,9 @@ static void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 	}
 
 	if (CurrentSong != -1 && (CurrentLevel != last_level || CurrentAct != last_act))
+	{
 		SetMusic();
+	}
 
 	// HACK: Result screen disables P1 control. There's probably a nicer way to do this, we just need to find it.
 	if (IsControllerEnabled(0))
@@ -71,7 +79,9 @@ static void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 		++ring_timer %= 60;
 
 		if (!ring_timer)
+		{
 			AddRings(-1);
+		}
 	}
 }
 static void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
@@ -83,8 +93,11 @@ static void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 static void SuperSonicManager_Load()
 {
 	ObjectMaster* obj = LoadObject((LoadObj)0, 2, SuperSonicManager_Main);
+
 	if (obj)
+	{
 		obj->DeleteSub = SuperSonicManager_Delete;
+	}
 
 	SetMusic();
 }
@@ -170,11 +183,15 @@ extern "C"
 	void EXPORT OnFrame()
 	{
 		if (GameState != 15 || MetalSonicFlag)
+		{
 			return;
+		}
 
 #ifndef _DEBUG
 		if (!GetEventFlag(EventFlags_SuperSonicAdventureComplete))
+		{
 			return;
+		}
 #endif
 
 		bool isBlacklisted = IsStageBlacklisted();
@@ -185,17 +202,21 @@ extern "C"
 			CharObj2* data2 = CharObj2Ptrs[i];
 
 			if (data1 == nullptr || data1->CharID != Characters_Sonic)
+			{
 				continue;
+			}
 
 			bool isSuper = (data2->Upgrades & Upgrades_SuperSonic) != 0;
-			bool toggle = (Controllers[i].PressedButtons & Buttons_B) != 0;
+			bool toggle = (ControllerPointers[i]->PressedButtons & Buttons_B) != 0;
 			bool action = !isSuper ? (last_action[i] == 8 && data1->Action == 12) : (last_action[i] == 82 && data1->Action == 78);
 
 			if (!isSuper)
 			{
 #ifdef _DEBUG
 				if (!Rings)
+				{
 					Rings = 50;
+				}
 #endif
 				if (toggle && action)
 				{
@@ -212,7 +233,9 @@ extern "C"
 						PlayVoice(396);
 
 						if (!super_count++)
+						{
 							SuperSonicManager_Load();
+						}
 					}
 				}
 			}
@@ -226,7 +249,9 @@ extern "C"
 				if (isBlacklisted || detransform || action && toggle || !Rings)
 				{
 					if (detransform)
+					{
 						PlayVoice(clips[_rand() % LengthOfArray(clips)]);
+					}
 
 					// Change back to normal Sonic
 					ForcePlayerAction(i, 47);
