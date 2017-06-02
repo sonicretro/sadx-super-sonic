@@ -104,7 +104,14 @@ static void SuperSonicManager_Load()
 
 static int __stdcall SuperWaterCheck_C(EntityData1* data1, CharObj2* data2)
 {
-	return (int)(data1->CharID == Characters_Sonic && (data2->Upgrades & Upgrades_SuperSonic) != 0);
+	auto pad = ControllerPointers[data1->CharIndex];
+
+	if (data1->CharID == Characters_Sonic && (data2->Upgrades & Upgrades_SuperSonic) != 0)
+	{
+		return pad && !(pad->HeldButtons & AttackButtons);
+	}
+
+	return false;
 }
 
 static const void* surface_solid = (void*)0x004496E7;
@@ -143,7 +150,7 @@ static void __declspec(naked) SuperWaterCheck()
 
 static const PVMEntry SuperSonicPVM = { "SUPERSONIC", &SUPERSONIC_TEXLIST };
 
-static inline bool IsStageBlacklisted()
+inline bool IsStageBlacklisted()
 {
 	switch (CurrentLevel)
 	{
@@ -151,7 +158,7 @@ static inline bool IsStageBlacklisted()
 			return false;
 
 		case LevelIDs_Casinopolis:
-			return (CurrentAct == 2 || CurrentAct == 3);
+			return CurrentAct == 2 || CurrentAct == 3;
 
 		case LevelIDs_SpeedHighway:
 			return CurrentAct == 1;
@@ -169,8 +176,7 @@ extern "C"
 		WriteJump((void*)0x004496E1, SuperWaterCheck);
 
 		// Fixes vertical offset when completing a stage
-		Uint8 nop[7] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
-		WriteData((void*)0x00494E13, &nop, 7);
+		WriteData((Uint8*)0x00494E13, 0x90i8, 7);
 
 		// Fixes upside down water plane in Emerald Coast 2
 		LandTable* ec2mesh = (LandTable*)0x01039E9C;
