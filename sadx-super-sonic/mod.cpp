@@ -18,7 +18,7 @@ static short last_act = 0;
 static int LevelSong = 0;
 static Uint8 last_action[8] = {};
 
-static int clips[] = {
+static const int clips[] = {
 	402,
 	508,
 	874,
@@ -174,10 +174,13 @@ extern "C"
 
 		// Fixes upside down water plane in Emerald Coast 2
 		LandTable* ec2mesh = (LandTable*)0x01039E9C;
-		NJS_OBJECT* obj = ec2mesh->COLList[1].OBJECT;
+		NJS_OBJECT* obj = ec2mesh->Col[1].Model;
 		obj->ang[0] = 32768;
 		obj->pos[1] = -3.0f;
 		obj->pos[2] = -5850.0f;
+
+		// Always initialize Super Sonic weld data.
+		WriteData((Uint8*)0x0049AC6A, 0x90i8, 2);
 	}
 
 	void EXPORT OnFrame()
