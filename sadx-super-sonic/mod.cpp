@@ -176,7 +176,7 @@ extern "C"
 		WriteJump((void*)0x004496E1, SuperWaterCheck);
 
 		// Fixes vertical offset when completing a stage
-		WriteData((Uint8*)0x00494E13, 0x90i8, 7);
+		WriteData<7>((Uint8*)0x00494E13, 0x90i8);
 
 		// Fixes upside down water plane in Emerald Coast 2
 		LandTable* ec2mesh = (LandTable*)0x01039E9C;
@@ -186,7 +186,7 @@ extern "C"
 		obj->pos[2] = -5850.0f;
 
 		// Always initialize Super Sonic weld data.
-		WriteData((Uint8*)0x0049AC6A, 0x90i8, 2);
+		WriteData<2>((Uint8*)0x0049AC6A, 0x90i8);
 	}
 
 	void EXPORT OnFrame()
