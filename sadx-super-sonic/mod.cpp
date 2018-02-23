@@ -45,7 +45,7 @@ static void RestoreMusic()
 
 static void __cdecl _Sonic_SuperPhysics_Delete(ObjectMaster* _this)
 {
-	char index = *(char*)_this->UnknownB_ptr;
+	int index = *static_cast<char*>(_this->UnknownB_ptr);
 	CharObj2* data2 = CharObj2Ptrs[index];
 
 	if (data2 != nullptr)
@@ -86,7 +86,7 @@ static void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 }
 static void SuperSonicManager_Load()
 {
-	ObjectMaster* obj = LoadObject((LoadObj)0, 2, SuperSonicManager_Main);
+	ObjectMaster* obj = LoadObject(static_cast<LoadObj>(0), 2, SuperSonicManager_Main);
 
 	if (obj)
 	{
@@ -98,7 +98,7 @@ static void SuperSonicManager_Load()
 
 static int __stdcall SuperWaterCheck_C(EntityData1* data1, CharObj2* data2)
 {
-	auto pad = ControllerPointers[data1->CharIndex];
+	auto pad = ControllerPointers[static_cast<int>(data1->CharIndex)];
 
 	if (data1->CharID == Characters_Sonic && (data2->Upgrades & Upgrades_SuperSonic) != 0)
 	{
@@ -108,8 +108,8 @@ static int __stdcall SuperWaterCheck_C(EntityData1* data1, CharObj2* data2)
 	return false;
 }
 
-static const void* surface_solid = (void*)0x004496E7;
-static const void* surface_water = (void*)0x004497B6;
+static const void* surface_solid = reinterpret_cast<void*>(0x004496E7);
+static const void* surface_water = reinterpret_cast<void*>(0x004497B6);
 static void __declspec(naked) SuperWaterCheck()
 {
 	__asm
@@ -161,26 +161,26 @@ inline bool IsStageBlacklisted()
 
 extern "C"
 {
-	EXPORT ModInfo SADXModInfo = { ModLoaderVer };
+	EXPORT ModInfo SADXModInfo = { ModLoaderVer, nullptr, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0 };
 
 	void EXPORT Init(const char* path, HelperFunctions* helper)
 	{
 		helper->RegisterCharacterPVM(Characters_Sonic, SuperSonicPVM);
-		WriteData((void**)0x004943C2, (void*)_Sonic_SuperPhysics_Delete);
-		WriteJump((void*)0x004496E1, SuperWaterCheck);
+		WriteData(reinterpret_cast<void**>(0x004943C2), static_cast<void*>(_Sonic_SuperPhysics_Delete));
+		WriteJump(reinterpret_cast<void*>(0x004496E1), SuperWaterCheck);
 
 		// Fixes vertical offset when completing a stage
-		WriteData<7>((Uint8*)0x00494E13, 0x90i8);
+		WriteData<7>(reinterpret_cast<Uint8*>(0x00494E13), 0x90i8);
 
 		// Fixes upside down water plane in Emerald Coast 2
-		LandTable* ec2mesh = (LandTable*)0x01039E9C;
-		NJS_OBJECT* obj = ec2mesh->Col[1].Model;
+		auto ec2_mesh = reinterpret_cast<LandTable*>(0x01039E9C);
+		NJS_OBJECT* obj = ec2_mesh->Col[1].Model;
 		obj->ang[0] = 32768;
 		obj->pos[1] = -3.0f;
 		obj->pos[2] = -5850.0f;
 
 		// Always initialize Super Sonic weld data.
-		WriteData<2>((Uint8*)0x0049AC6A, 0x90i8);
+		WriteData<2>(reinterpret_cast<Uint8*>(0x0049AC6A), 0x90i8);
 	}
 
 	void EXPORT OnFrame()
@@ -199,7 +199,7 @@ extern "C"
 
 		bool isBlacklisted = IsStageBlacklisted();
 
-		for (Uint8 i = 0; i < 8; i++)
+		for (size_t i = 0; i < 8; i++)
 		{
 			EntityData1* data1 = EntityData1Ptrs[i];
 			CharObj2* data2 = CharObj2Ptrs[i];
@@ -247,9 +247,9 @@ extern "C"
 				// TODO: Consider storing the queued action in the case of NextAction 13, then re-applying
 				// the stored queued action next frame to fix the spindashy things.
 				bool detransform = data1->Status & Status_DoNextAction &&
-					(data1->NextAction == 12 || data1->NextAction == 13 && CurrentLevel == LevelIDs_TwinklePark);
+					(data1->NextAction == 12 || (data1->NextAction == 13 && CurrentLevel == LevelIDs_TwinklePark));
 
-				if (isBlacklisted || detransform || action && toggle || !Rings)
+				if (isBlacklisted || detransform || (action && toggle) || !Rings)
 				{
 					if (detransform)
 					{
