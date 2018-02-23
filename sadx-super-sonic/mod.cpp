@@ -5,11 +5,11 @@
 
 FunctionPointer(int, _rand, (void), 0x006443BF);
 
-static int ring_timer = 0;
-static int super_count = 0;	// Dirty hack for multitap mod compatibility
-static short last_level = 0;
-static short last_act = 0;
-static int LevelSong = 0;
+static int   ring_timer     = 0;
+static int   super_count    = 0; // Dirty hack for multitap mod compatibility
+static short last_level     = 0;
+static short last_act       = 0;
+static int   level_song     = 0;
 static Uint8 last_action[8] = {};
 
 static const int clips[] = {
@@ -20,7 +20,7 @@ static const int clips[] = {
 	1461
 };
 
-static void SetMusic()
+static void set_music()
 {
 	if (!Music_Enabled || CurrentSong == MusicIDs_ThemeOfSuperSonic)
 	{
@@ -30,17 +30,17 @@ static void SetMusic()
 	last_level = CurrentLevel;
 	last_act = CurrentAct;
 
-	LevelSong = LastSong;
+	level_song = LastSong;
 	LastSong = CurrentSong = MusicIDs_ThemeOfSuperSonic;
 }
-static void RestoreMusic()
+static void restore_music()
 {
 	if (!Music_Enabled)
 	{
 		return;
 	}
 
-	LastSong = CurrentSong = LevelSong;
+	LastSong = CurrentSong = level_song;
 }
 
 static void __cdecl _Sonic_SuperPhysics_Delete(ObjectMaster* _this)
@@ -64,7 +64,7 @@ static void __cdecl SuperSonicManager_Main(ObjectMaster* _this)
 
 	if (CurrentSong != -1 && (CurrentLevel != last_level || CurrentAct != last_act))
 	{
-		SetMusic();
+		set_music();
 	}
 
 	// HACK: Result screen disables P1 control. There's probably a nicer way to do this, we just need to find it.
@@ -82,7 +82,7 @@ static void __cdecl SuperSonicManager_Delete(ObjectMaster* _this)
 {
 	super_count = 0;
 	ring_timer = 0;
-	RestoreMusic();
+	restore_music();
 }
 static void SuperSonicManager_Load()
 {
@@ -93,7 +93,7 @@ static void SuperSonicManager_Load()
 		obj->DeleteSub = SuperSonicManager_Delete;
 	}
 
-	SetMusic();
+	set_music();
 }
 
 static int __stdcall SuperWaterCheck_C(EntityData1* data1, CharObj2* data2)
@@ -144,7 +144,7 @@ static void __declspec(naked) SuperWaterCheck()
 
 static const PVMEntry SuperSonicPVM = { "SUPERSONIC", &SUPERSONIC_TEXLIST };
 
-inline bool IsStageBlacklisted()
+inline bool is_stage_blacklisted()
 {
 	switch (CurrentLevel)
 	{
@@ -197,7 +197,7 @@ extern "C"
 		}
 #endif
 
-		bool isBlacklisted = IsStageBlacklisted();
+		bool is_blacklisted = is_stage_blacklisted();
 
 		for (size_t i = 0; i < 8; i++)
 		{
@@ -209,11 +209,11 @@ extern "C"
 				continue;
 			}
 
-			bool isSuper = (data2->Upgrades & Upgrades_SuperSonic) != 0;
+			bool is_super = (data2->Upgrades & Upgrades_SuperSonic) != 0;
 			bool toggle = (ControllerPointers[i]->PressedButtons & Buttons_B) != 0;
-			bool action = !isSuper ? (last_action[i] == 8 && data1->Action == 12) : (last_action[i] == 82 && data1->Action == 78);
+			bool action = !is_super ? (last_action[i] == 8 && data1->Action == 12) : (last_action[i] == 82 && data1->Action == 78);
 
-			if (!isSuper)
+			if (!is_super)
 			{
 #ifdef _DEBUG
 				if (!Rings)
@@ -223,7 +223,7 @@ extern "C"
 #endif
 				if (toggle && action)
 				{
-					if (isBlacklisted)
+					if (is_blacklisted)
 					{
 						PlayVoice(clips[_rand() % LengthOfArray(clips)]);
 					}
@@ -249,7 +249,7 @@ extern "C"
 				bool detransform = data1->Status & Status_DoNextAction &&
 					(data1->NextAction == 12 || (data1->NextAction == 13 && CurrentLevel == LevelIDs_TwinklePark));
 
-				if (isBlacklisted || detransform || (action && toggle) || !Rings)
+				if (is_blacklisted || detransform || (action && toggle) || !Rings)
 				{
 					if (detransform)
 					{
