@@ -197,6 +197,12 @@ extern "C"
 		}
 #endif
 
+		// Don't perform custom Super Sonic checks in Super Sonic's story.
+		if (LastStoryFlag != 0)
+		{
+			return;
+		}
+
 		bool is_blacklisted = is_stage_blacklisted();
 
 		for (int i = 0; i < 8; i++)
