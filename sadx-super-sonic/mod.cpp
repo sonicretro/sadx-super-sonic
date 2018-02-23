@@ -199,7 +199,7 @@ extern "C"
 
 		bool is_blacklisted = is_stage_blacklisted();
 
-		for (size_t i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 		{
 			EntityData1* data1 = EntityData1Ptrs[i];
 			CharObj2* data2 = CharObj2Ptrs[i];
