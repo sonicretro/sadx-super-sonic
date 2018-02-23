@@ -3,12 +3,6 @@
 
 #define EXPORT __declspec(dllexport)
 
-DataPointer(NJS_TEXLIST, SUPERSONIC_TEXLIST, 0x0142272C);
-DataPointer(bool, SuperSonicFlag, 0x03C55D45);
-DataPointer(int, CurrentSong, 0x00912698);
-DataPointer(int, LastSong, 0x0091269C);
-DataPointer(Bool, Music_Enabled, 0x0091268C);
-
 FunctionPointer(int, _rand, (void), 0x006443BF);
 
 static int ring_timer = 0;
@@ -207,7 +201,7 @@ extern "C"
 
 		for (Uint8 i = 0; i < 8; i++)
 		{
-			EntityData1* data1 = CharObj1Ptrs[i];
+			EntityData1* data1 = EntityData1Ptrs[i];
 			CharObj2* data2 = CharObj2Ptrs[i];
 
 			if (data1 == nullptr || data1->CharID != Characters_Sonic)
